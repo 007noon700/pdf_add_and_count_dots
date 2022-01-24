@@ -8,9 +8,8 @@ root = Tk()
 #setting up a tkinter canvas
 w = Canvas(root, width=750, height=750)
 
-w.pack()
+w.grid(row=0,column=0)
 color = '#000000'
-dot_list = tk.LabelFrame(root, text="Dot List")
 colors_count = {}
 
 #adding the image
@@ -19,6 +18,14 @@ colors_count = {}
 # original = original.resize((1000,1000)) #resize image
 # img = ImageTk.PhotoImage(original)
 # w.create_image(0, 0, image=img, anchor="nw")
+
+def create_frame():
+    dot_list = tk.LabelFrame(root, text="Dot List")
+    dot_list.grid(row=0, column=1)
+    button = Button(dot_list, text = "Select color",
+                   command = choose_color)            
+    button.grid(row=0, column=1)
+    return dot_list
 
 def create_circle(x, y, r, canvasName): #center coordinates, radius
     x0 = x - r
@@ -45,21 +52,13 @@ def draw_circle(event):
     generate_list()
 
 def generate_list():
-    global dot_list
-    if dot_list:
-        dot_list.destroy()
-    dot_list = tk.LabelFrame(root, text="Dot List")
-    dot_list.pack()
-    r = 0
+    dot_list = create_frame()
+    r = 1
     for item in colors_count:
         label = tk.Label(dot_list, text='#', bg=item, fg=item).grid(row=r, column=0)
         first_label = tk.Label(dot_list, text=colors_count[item]).grid(row=r, column=1)
         r+=1
 
-button = Button(root, text = "Select color",
-                   command = choose_color)
-                   
-button.pack()
-
+create_frame()
 w.bind("<Button 1>",draw_circle)
 root.mainloop()
