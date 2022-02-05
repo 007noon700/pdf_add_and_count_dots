@@ -6,11 +6,13 @@ import pdf_manager as pdf
 
 def create_frame():
     global dot_list
+    global curr_color
     if dot_list:
         dot_list.destroy()
     dot_list = tk.LabelFrame(root, text="Menu")
     dot_list.grid(row=0, column=1)
-    curr_color = tk.Label(dot_list, text='#', bg=color, fg=color).grid(row=0, column=0)
+    curr_color = tk.Label(dot_list, text='#', bg=color, fg=color)
+    curr_color.grid(row=0, column=0)
     first_label = tk.Label(dot_list, text="<- Current Color").grid(row=0, column=1)
     button = Button(dot_list, text = "Select color",
                    command = choose_color)            
@@ -28,8 +30,10 @@ def create_circle(x, y, r, canvasName): #center coordinates, radius
 
 def choose_color():
     global color
+    global curr_color
     # variable to store hexadecimal code of color
     color_code = colorchooser.askcolor(title ="Choose color")
+    curr_color.config(bg=color_code[1], fg=color_code[1])
     print(color_code[1])
     color = color_code[1]
 
@@ -52,7 +56,8 @@ def generate_list():
 
 root = Tk()
 file = pdf.load_pdf()
-color = '#000000'
+color = '#000000'    
+curr_color = tk.Label(root, text='#', bg=color, fg=color)
 colors_count = {}
 dot_list = tk.LabelFrame(root, text="Menu")
 pdf_img = pdf.convert_pdf_to_tk(file)
