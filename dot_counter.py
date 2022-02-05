@@ -17,8 +17,6 @@ def create_frame():
     button = Button(dot_list, text = "Select color",
                    command = choose_color)            
     button.grid(row=1, column=1)
-    fButton = Button(dot_list, text='Open', command=pdf.load_pdf)
-    fButton.grid(row=2, column=1)
     return dot_list
 
 def create_circle(x, y, r, canvasName): #center coordinates, radius
@@ -61,8 +59,10 @@ curr_color = tk.Label(root, text='#', bg=color, fg=color)
 colors_count = {}
 dot_list = tk.LabelFrame(root, text="Menu")
 pdf_img = pdf.convert_pdf_to_tk(file)
+w = pdf_img.width() + 50 #get the width dynamically and add a buffer of 50px
+h = pdf_img.height() + 50 #get the width dynamically and add a buffer of 50px
 #setting up a tkinter canvas
-w = Canvas(root, width=750, height=1000)
+w = Canvas(root, width=w, height=h)
 w.grid(row=0,column=0)
 w.create_image(20,20, anchor='nw', image=pdf_img)
 create_frame()
