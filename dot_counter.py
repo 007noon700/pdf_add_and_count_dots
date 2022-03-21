@@ -51,7 +51,7 @@ def create_circle(x, y, r, canvasName):  # center coordinates, radius
     y0 = y - r
     x1 = x + r
     y1 = y + r
-    return canvasName.create_oval(x0, y0, x1, y1, fill=this.color, outline=this.color)
+    return canvasName.create_oval(x0, y0, x1, y1, fill=this.color, outline=this.color, tags=this.color) #tags: make sure the color is stored in the circle!
 
 
 def choose_color():
@@ -73,11 +73,19 @@ def draw_circle(event):
 
 def del_circle(event):
     item = this.canvas.find_closest(event.x, event.y)
-    this.canvas.delete(item)
-    this.canvas.bind("<Button 1>", draw_circle)
+    print()
+    if this.canvas.type(item[0]) == 'oval':
+        tags = this.canvas.gettags(item[0])
+        print(tags)
+        this.colors_count[tags[0]] -= 1 #decrement the color!
+        this.canvas.delete(item)
+
+    else:
+        tk.messagebox.showerror(title='Error', message='No circle present!', )
+    # this.canvas.bind("<Button 1>", draw_circle)
 
 def delete():
-    this.canvas.bind("<Button 1>", del_circle)
+    this.canvas.bind("<Button 2>", del_circle)
 
 def generate_list():
     this.dot_list = create_frame()
@@ -106,9 +114,11 @@ def create_canvas(wx, hx):
     # w = zoom.CanvasImage(root, this.pdf_img, draw_circle)
     w = tk.Canvas(root, width=wx, height=hx)
     w.bind('<Button 1>',draw_circle)
+    w.bind('<Button 3>',del_circle)
     w.grid(row=0, column=0)
     w.create_image(20, 20, anchor='nw', image=this.pdf_img)
     create_frame()
+    this.canvas = w
     return w
 
 class MainWindow(ttk.Frame):
