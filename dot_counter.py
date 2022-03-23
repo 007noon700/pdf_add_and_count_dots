@@ -1,8 +1,10 @@
+from fileinput import close
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
 from tkinter.filedialog import askopenfilename
 from tkinter import colorchooser
+from turtle import xcor
 from PIL import Image, ImageTk
 import pdf_manager as pdf
 import zoom
@@ -21,6 +23,7 @@ class counter:
             self.pages = []
             self.canvas = None
             self.last_circle = None
+            self.diam = 10
 
 this = counter()
 
@@ -43,6 +46,8 @@ def create_frame():
     button = Button(this.dot_list, text="Select color",
                     command=choose_color)
     button.grid(row=2, column=1)
+    sButton = Button(this.dot_list, text="Change dot size", command=set_size)
+    sButton.grid(row=2, column=0)
     return this.dot_list
 
 
@@ -68,7 +73,7 @@ def draw_circle(event):
     else:
         this.colors_count[this.color] = 1
     print(this.colors_count)
-    create_circle(event.x, event.y, 10, this.canvas)
+    create_circle(event.x, event.y, this.diam, this.canvas)
     generate_list()
 
 def del_circle(event):
@@ -120,6 +125,27 @@ def create_canvas(wx, hx):
     create_frame()
     this.canvas = w
     return w
+
+def set_size():
+
+     # Toplevel object which will
+    # be treated as a new window
+    newWindow = Toplevel(root)
+    newWindow.title("Set dot size")
+    newWindow.geometry("200x200")
+    Label(newWindow,
+          text ="This is a new window").pack()
+    d = this.diam
+    s = tk.Scale(newWindow, variable=d)
+    s.set(d)
+    s.pack()
+    close = tk.Button(newWindow, text="Save and close", command=lambda: close_and_save(s, newWindow))
+    close.pack()
+
+def close_and_save(scale, window):
+    this.diam = scale.get()
+    window.destroy()
+
 
 class MainWindow(ttk.Frame):
     """ Main window class """
