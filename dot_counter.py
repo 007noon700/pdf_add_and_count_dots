@@ -7,6 +7,8 @@ from tkinter import colorchooser
 from turtle import xcor
 from PIL import Image, ImageTk
 import pdf_manager as pdf
+import webcolors
+import csv
 import zoom
 import pickle
 
@@ -48,6 +50,8 @@ def create_frame():
     button.grid(row=2, column=1)
     sButton = Button(this.dot_list, text="Change dot size", command=set_size)
     sButton.grid(row=2, column=0)
+    saveButton = Button(this.dot_list, text="Save all counts", command=export)
+    saveButton.grid(row=1, column=3)
     return this.dot_list
 
 
@@ -146,6 +150,40 @@ def close_and_save(scale, window):
     this.diam = scale.get()
     window.destroy()
 
+def export():
+    headers = ['color', 'count']
+    data = []
+    for color in this.colors_count:
+        name = get_color_name(color)
+        count = this.colors_count[color]
+        data.append([name, count])
+    with open('count.csv', 'w', newline='') as f:
+        # create the csv writer
+        writer = csv.writer(f)
+        writer.writerow(headers)
+        print(data)
+        for row in data:
+        # write a row to the csv file
+            writer.writerow(row)
+
+#https://stackoverflow.com/questions/9694165/convert-rgb-color-to-english-color-name-like-green-with-python
+def closest_color(requested_colour):
+    min_colours = {}
+    for key, name in webcolors.CSS3_HEX_TO_NAMES.items():
+        r_b, g_b, b_b = webcolors.hex_to_rgb(requested_colour)
+        r_c, g_c, b_c = webcolors.hex_to_rgb(key)
+        rd = (r_c - r_b) ** 2
+        gd = (g_c - g_b) ** 2
+        bd = (b_c - b_b) ** 2
+        min_colours[(rd + gd + bd)] = name
+    return min_colours[min(min_colours.keys())]
+
+def get_color_name(requested_colour):
+    try:
+        return webcolors.hex_to_name(requested_colour)
+    except ValueError:
+        closest_name = closest_color(requested_colour)
+    return closest_name
 
 class MainWindow(ttk.Frame):
     """ Main window class """
