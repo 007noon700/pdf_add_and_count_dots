@@ -9,8 +9,6 @@ from PIL import Image, ImageTk
 import pdf_manager as pdf
 import webcolors
 import csv
-import zoom
-import pickle
 
 root = Tk()
 
@@ -137,8 +135,7 @@ def set_size():
     newWindow = Toplevel(root)
     newWindow.title("Set dot size")
     newWindow.geometry("200x200")
-    Label(newWindow,
-          text ="This is a new window").pack()
+    Label(newWindow).pack()
     d = this.diam
     s = tk.Scale(newWindow, variable=d)
     s.set(d)
