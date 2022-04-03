@@ -2,6 +2,7 @@ from fileinput import close
 from tkinter import *
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
 from tkinter.filedialog import askopenfilename
 from tkinter import colorchooser
 from turtle import xcor
@@ -154,7 +155,8 @@ def export():
         name = get_color_name(color)
         count = this.colors_count[color]
         data.append([name, count])
-    with open('count.csv', 'w', newline='') as f:
+    name = filedialog.asksaveasfilename(defaultextension='csv')
+    with open(name, 'w', newline='') as f:
         # create the csv writer
         writer = csv.writer(f)
         writer.writerow(headers)
