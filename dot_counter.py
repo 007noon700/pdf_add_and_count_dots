@@ -1,20 +1,26 @@
 from fileinput import close
 from tkinter import *
 import tkinter as tk
-from tkinter import ttk
 from tkinter import filedialog
+from tkinter import ttk, ALL
 from tkinter.filedialog import askopenfilename
 from tkinter import colorchooser
 from turtle import xcor
+import warnings
 from PIL import Image, ImageTk
 import pdf_manager as pdf
 import webcolors
 import csv
 
 root = Tk()
+class circle:
+    def __init__(self, x, y, color, size, id):
+        self.x = x
+        self.y = y
+        self.color = color
+        self.size = size
+        self.id = id
 
-
-#TODO: Rebuild into classes
 class counter:
     def __init__(self):
             self.color = '#000000'
@@ -23,9 +29,12 @@ class counter:
             self.dot_list=tk.LabelFrame(root, text="Menu")
             self.pages = []
             self.canvas = None
-            self.last_circle = None
+            self.last_circle = 0
             self.diam = 10
+            self.curr_idx = 0
 
+    def init_pages(self, len):
+            self.pages = [ [] for _ in range(len) ]
 this = counter()
 
 def create_frame():
@@ -54,12 +63,12 @@ def create_frame():
     return this.dot_list
 
 
-def create_circle(x, y, r, canvasName):  # center coordinates, radius
+def create_circle(x, y, r, canvasName, id):  # center coordinates, radius
     x0 = x - r
     y0 = y - r
     x1 = x + r
     y1 = y + r
-    return canvasName.create_oval(x0, y0, x1, y1, fill=this.color, outline=this.color, tags=this.color) #tags: make sure the color is stored in the circle!
+    return canvasName.create_oval(x0, y0, x1, y1, fill=this.color, outline=this.color, tags=(this.color, id)) #tags: make sure the color is stored in the circle!
 
 
 def choose_color():
@@ -76,7 +85,10 @@ def draw_circle(event):
     else:
         this.colors_count[this.color] = 1
     print(this.colors_count)
-    create_circle(event.x, event.y, this.diam, this.canvas)
+    c = circle(event.x, event.y, this.color, this.diam, this.last_circle)
+    this.pages[this.curr_idx].append(c)
+    create_circle(event.x, event.y, this.diam, this.canvas, this.last_circle)
+    this.last_circle += 1
     generate_list()
 
 def del_circle(event):
@@ -87,9 +99,6 @@ def del_circle(event):
         print(tags)
         this.colors_count[tags[0]] -= 1 #decrement the color!
         this.canvas.delete(item)
-
-    else:
-        tk.messagebox.showerror(title='Error', message='No circle present!', )
     # this.canvas.bind("<Button 1>", draw_circle)
 
 def delete():
@@ -107,16 +116,13 @@ def generate_list():
 
 def chng_pg(next):
     idx = this.curr_idx
-    # this.pages[idx] = pickle.dumps(this.canvas)
-    # this.canvas.delete()
     this.pdf_img, this.curr_idx =p.change_page(this.curr_idx, next)
-    # img = this.pdf_img.getimage()
     wx = this.pdf_img.width() + 50  # get the width dynamically and add a buffer of 50px
     hx = this.pdf_img.height() + 50  # get the width dynamically and add a buffer of 50px
-    if this.pages[idx] is not None:
-        this.canvas=this.pages[idx].loads()
-    else:
-        this.canvas = create_canvas(wx, hx)
+    this.canvas = create_canvas(wx, hx)
+    for item in this.pages[this.curr_idx]:
+        if item is not None:
+            create_circle(item.x, item.y, item.size, this.canvas, item.id)
 
 def create_canvas(wx, hx):
     # w = zoom.CanvasImage(root, this.pdf_img, draw_circle)
@@ -198,15 +204,23 @@ class MainWindow(ttk.Frame):
         self.master.columnconfigure(0, weight=1)
         this.canvas= create_canvas(wx, hx)  # create widget
 
+# def do_zoom(event):
+#     x = this.canvas.canvasx(event.x)
+#     y = this.canvas.canvasy(event.y)
+#     factor = 1.001 ** event.delta
+#     this.canvas.scale(ALL, x, y, factor, factor)
+
 p = pdf.pdf_manager(root)
+# c = container()
 file, len = p.load_pdf()
-this.pages = [None] * len
+this.init_pages(len)
 print(this.pages)
 this.pdf_img, this.curr_idx = p.convert_pdf_to_tk(file)
 wx = this.pdf_img.width() + 50  # get the width dynamically and add a buffer of 50px
 hx = this.pdf_img.height() + 50  # get the width dynamically and add a buffer of 50px
 # setting up a tkinter canvas
 this.canvas = create_canvas(wx, hx)
+# this.canvas.bind("<MouseWheel>", do_zoom)
+# this.canvas.bind('<ButtonPress-1>', lambda event: this.canvas.scan_mark(event.x, event.y))
+# this.canvas.bind("<B1-Motion>", lambda event: this.canvas.scan_dragto(event.x, event.y, gain=1))
 root.mainloop()
-# app = MainWindow(root, wx, hx)
-# app.mainloop()
