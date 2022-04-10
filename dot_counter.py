@@ -33,8 +33,8 @@ class counter:
             self.diam = 10
             self.curr_idx = 0
 
-    def init_pages(self, len):
-            self.pages = [ [] for _ in range(len) ]
+    def init_pages(self, l):
+            self.pages = [ [] for _ in range(l) ]
 this = counter()
 
 def create_frame():
@@ -75,7 +75,6 @@ def choose_color():
     # variable to store hexadecimal code of color
     color_code = colorchooser.askcolor(title="Choose color")
     this.curr_color.config(bg=color_code[1], fg=color_code[1])
-    print(color_code[1])
     this.color = color_code[1]
 
 
@@ -84,7 +83,6 @@ def draw_circle(event):
         this.colors_count[this.color] += 1
     else:
         this.colors_count[this.color] = 1
-    print(this.colors_count)
     c = circle(event.x, event.y, this.color, this.diam, this.last_circle)
     this.pages[this.curr_idx].append(c)
     create_circle(event.x, event.y, this.diam, this.canvas, this.last_circle)
@@ -96,10 +94,11 @@ def del_circle(event):
     print()
     if this.canvas.type(item[0]) == 'oval':
         tags = this.canvas.gettags(item[0])
-        print(tags)
+        i = search(this.pages[this.curr_idx], int(tags[1]))
+        this.pages[this.curr_idx].remove(this.pages[this.curr_idx][i])
         this.colors_count[tags[0]] -= 1 #decrement the color!
         this.canvas.delete(item)
-    # this.canvas.bind("<Button 1>", draw_circle)
+        generate_list()
 
 def delete():
     this.canvas.bind("<Button 2>", del_circle)
@@ -123,6 +122,7 @@ def chng_pg(next):
     for item in this.pages[this.curr_idx]:
         if item is not None:
             create_circle(item.x, item.y, item.size, this.canvas, item.id)
+    generate_list()
 
 def create_canvas(wx, hx):
     # w = zoom.CanvasImage(root, this.pdf_img, draw_circle)
@@ -166,7 +166,6 @@ def export():
         # create the csv writer
         writer = csv.writer(f)
         writer.writerow(headers)
-        print(data)
         for row in data:
         # write a row to the csv file
             writer.writerow(row)
@@ -190,6 +189,22 @@ def get_color_name(requested_colour):
         closest_name = closest_color(requested_colour)
     return closest_name
 
+def search(arr, target):
+    #binary search which probably won't make that big of a difference but still
+    min = 0
+    max = len(arr) - 1
+    mid = (min+max) // 2
+    c = arr[mid]
+    cid = int(c.id)
+    while min < max:
+        if cid == target:
+            return mid
+        elif cid < target:
+            return mid + 1 + search(arr[mid+1:], target)
+        else:
+            return search(arr[:mid], target)
+    return mid
+
 class MainWindow(ttk.Frame):
     """ Main window class """
     def __init__(self, mainframe, wx, hx):
@@ -204,23 +219,15 @@ class MainWindow(ttk.Frame):
         self.master.columnconfigure(0, weight=1)
         this.canvas= create_canvas(wx, hx)  # create widget
 
-# def do_zoom(event):
-#     x = this.canvas.canvasx(event.x)
-#     y = this.canvas.canvasy(event.y)
-#     factor = 1.001 ** event.delta
-#     this.canvas.scale(ALL, x, y, factor, factor)
 
 p = pdf.pdf_manager(root)
-# c = container()
-file, len = p.load_pdf()
-this.init_pages(len)
+
+file, l = p.load_pdf()
+this.init_pages(l)
 print(this.pages)
 this.pdf_img, this.curr_idx = p.convert_pdf_to_tk(file)
 wx = this.pdf_img.width() + 50  # get the width dynamically and add a buffer of 50px
 hx = this.pdf_img.height() + 50  # get the width dynamically and add a buffer of 50px
 # setting up a tkinter canvas
 this.canvas = create_canvas(wx, hx)
-# this.canvas.bind("<MouseWheel>", do_zoom)
-# this.canvas.bind('<ButtonPress-1>', lambda event: this.canvas.scan_mark(event.x, event.y))
-# this.canvas.bind("<B1-Motion>", lambda event: this.canvas.scan_dragto(event.x, event.y, gain=1))
 root.mainloop()
