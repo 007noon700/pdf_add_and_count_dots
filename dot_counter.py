@@ -1,4 +1,5 @@
 from fileinput import close
+from platform import system
 from tkinter import *
 import tkinter as tk
 from tkinter import filedialog
@@ -100,9 +101,6 @@ def del_circle(event):
         this.canvas.delete(item)
         generate_list()
 
-def delete():
-    this.canvas.bind("<Button 2>", del_circle)
-
 def generate_list():
     this.dot_list = create_frame()
     r = 3
@@ -125,10 +123,10 @@ def chng_pg(next):
     generate_list()
 
 def create_canvas(wx, hx):
-    # w = zoom.CanvasImage(root, this.pdf_img, draw_circle)
     w = tk.Canvas(root, width=wx, height=hx)
     w.bind('<Button 1>',draw_circle)
-    w.bind('<Button 3>',del_circle)
+    #if mac, we need to bind delete to button2, else button3 because these OSes are dumb
+    w.bind('<Button 2>',del_circle) if system() == 'Darwin' else w.bind('<Button 3>',del_circle)
     w.grid(row=0, column=0)
     w.create_image(20, 20, anchor='nw', image=this.pdf_img)
     create_frame()
@@ -136,9 +134,6 @@ def create_canvas(wx, hx):
     return w
 
 def set_size():
-
-     # Toplevel object which will
-    # be treated as a new window
     newWindow = Toplevel(root)
     newWindow.title("Set dot size")
     newWindow.geometry("200x200")
@@ -230,4 +225,5 @@ wx = this.pdf_img.width() + 50  # get the width dynamically and add a buffer of 
 hx = this.pdf_img.height() + 50  # get the width dynamically and add a buffer of 50px
 # setting up a tkinter canvas
 this.canvas = create_canvas(wx, hx)
+
 root.mainloop()
