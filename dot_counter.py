@@ -7,7 +7,7 @@ from tkinter import ttk, ALL
 from tkinter.filedialog import askopenfilename
 from tkinter import colorchooser
 from turtle import xcor
-import warnings
+from color_menu import color_menu
 from PIL import Image, ImageTk
 import pdf_manager as pdf
 import webcolors
@@ -33,6 +33,7 @@ class counter:
             self.last_circle = 0
             self.diam = 10
             self.curr_idx = 0
+            self.cm = None
 
     def init_pages(self, l):
             self.pages = [ [] for _ in range(l) ]
@@ -55,7 +56,7 @@ def create_frame():
     first_label = tk.Label(
         this.dot_list, text="<- Current Color").grid(row=1, column=1)
     button = Button(this.dot_list, text="Select color",
-                    command=choose_color)
+                    command=lambda: choose_color(this.cm))
     button.grid(row=2, column=1)
     sButton = Button(this.dot_list, text="Change dot size", command=set_size)
     sButton.grid(row=2, column=0)
@@ -72,11 +73,16 @@ def create_circle(x, y, r, canvasName, id):  # center coordinates, radius
     return canvasName.create_oval(x0, y0, x1, y1, fill=this.color, outline=this.color, tags=(this.color, id)) #tags: make sure the color is stored in the circle!
 
 
-def choose_color():
+def choose_color(cm):
     # variable to store hexadecimal code of color
-    color_code = colorchooser.askcolor(title="Choose color")
-    this.curr_color.config(bg=color_code[1], fg=color_code[1])
-    this.color = color_code[1]
+    # color_code = colorchooser.askcolor(title="Choose color")
+    # this.curr_color.config(bg=color_code[1], fg=color_code[1])
+    # this.color = color_code[1]
+    tl = Toplevel(root)
+    cm.generate_window(tl)
+    color_code = cm.chosen
+    this.curr_color.config(bg=color_code, fg=color_code)
+    this.color = color_code
 
 
 def draw_circle(event):
@@ -92,7 +98,6 @@ def draw_circle(event):
 
 def del_circle(event):
     item = this.canvas.find_closest(event.x, event.y)
-    print()
     if this.canvas.type(item[0]) == 'oval':
         tags = this.canvas.gettags(item[0])
         i = search(this.pages[this.curr_idx], int(tags[1]))
@@ -216,7 +221,7 @@ class MainWindow(ttk.Frame):
 
 
 p = pdf.pdf_manager(root)
-
+this.cm = color_menu()
 file, l = p.load_pdf()
 this.init_pages(l)
 print(this.pages)
